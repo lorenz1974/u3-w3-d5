@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Col } from 'react-bootstrap'
 import Slider from 'react-slick'
 import axios from 'axios'
-import { ITrack } from '../interfaces'
+import { ITrack, ITrackError, ITrackData } from '../interfaces'
 
 interface NewReleasesProps {
   trackList: string[]
@@ -19,7 +19,6 @@ interface ImageProps {
 
 const ImagePlaceHolder = ({
   trackId,
-  className,
   showArtist,
   showSongTitle,
 }: ImageProps) => {
@@ -28,32 +27,61 @@ const ImagePlaceHolder = ({
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setIsLoading(true)
-    setError(null)
-    axios
-      .get<ITrack>(
-        `https://striveschool-api.herokuapp.com/api/deezer/track/${trackId}`
-      )
-      .then((response) => {
-          setTrack(response.data)
-          if (response.data.error) { console.log(response.data) }
-        setIsLoading(false)
-      })
-      .catch((error) => {
+    const fetchTrack = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const response = await axios.get(
+          `https://striveschool-api.herokuapp.com/api/deezer/track/${trackId}`
+        )
+        if (response.data.error) {
+          setTrack({ type: 'error', error: response.data.error.message })
+        } else {
+          setTrack({ type: 'data', ...response.data })
+        }
+      } catch (error) {
         console.error('Error fetching trackInfo:', error)
-        setError(`Error fetching trackInfo: ${error}`)
+        setError(`Error fetching trackInfo: ${error.message}`)
+      } finally {
         setIsLoading(false)
-      })
+      }
+    }
+    fetchTrack()
   }, [trackId])
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>{error}</div>
-  if (!track) return <div>No track data available</div>
+  if (isLoading)
+    return (
+      <div className='text-warning d-flex justify-content-center align-items-center fs-7'>
+        Loading...
+      </div>
+    )
+  if (error)
+    return (
+      <div className='text-danger d-flex justify-content-center align-items-center fs-7'>
+        {error}
+      </div>
+    )
+  if (!track)
+    return (
+      <div className='text-danger d-flex justify-content-center align-items-center fs-7'>
+        No track data available
+      </div>
+    )
+  if (track.type === 'error')
+    return (
+      <div className='text-danger d-flex justify-content-center align-items-center fs-7'>
+        Error: {track.error || 'An unknown error occurred'}
+      </div>
+    )
   if (!track.album.cover_medium && !track.artist.picture_medium)
-    return <div>No image available</div>
+    return (
+      <div className='text-danger d-flex justify-content-center align-items-center fs-7'>
+        No image available
+      </div>
+    )
 
   return (
-    <Col className={`d-flex flex-column ${className}`}>
+    <div className='d-flex flex-column align-items-start justify-content-center fs-7'>
       <img
         className='rounded rounded-2 mt-4 bg-songPlaceHolder d-flex justify-content-center align-items-center'
         src={track.album.cover_medium || track.artist.picture_medium}
@@ -66,7 +94,7 @@ const ImagePlaceHolder = ({
       {showArtist && (
         <p className='fs-8 m-0 mt-1 p-0 text-gray-600'>{track.artist.name}</p>
       )}
-    </Col>
+    </div>
   )
 }
 
@@ -77,11 +105,11 @@ const NewReleases = (props: NewReleasesProps) => {
 
   // Configurazione del carosello
   const sliderSettings = {
-    dots: true,
+    dots: false,
     infinite: true,
     speed: 500,
-    slidesToShow: 6, // Mostra 6 elementi per volta su schermi grandi
-    slidesToScroll: 1,
+    slidesToShow: 6,
+    slidesToScroll: 3,
     responsive: [
       {
         breakpoint: 1280, // Per schermi medi-grandi
@@ -111,15 +139,16 @@ const NewReleases = (props: NewReleasesProps) => {
   }
 
   return (
-    <div style={{ overflow: 'hidden' }}>
+    <div className='slider-container'>
       <Slider {...sliderSettings}>
         {props.trackList.map((trackId, i) => (
-          <ImagePlaceHolder
-            key={`${trackId}${i}`}
-            trackId={trackId}
-            showSongTitle={props.showSongTitle}
-            showArtist={props.showArtist}
-          />
+          <Col key={`${trackId}${i}`} className='d-flex flex-column'>
+            <ImagePlaceHolder
+              trackId={trackId}
+              showSongTitle={props.showSongTitle}
+              showArtist={props.showArtist}
+            />
+          </Col>
         ))}
       </Slider>
     </div>

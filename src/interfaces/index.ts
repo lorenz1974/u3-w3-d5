@@ -1,36 +1,3 @@
-export interface test {
-    test: string
-}
-
-export interface ITrack {
-    id: number;
-    readable: boolean;
-    title: string;
-    title_short: string;
-    title_version: string;
-    isrc: string;
-    link: string;
-    share: string;
-    duration: number;
-    track_position: number;
-    disk_number: number;
-    rank: number;
-    release_date: Date;
-    explicit_lyrics: boolean;
-    explicit_content_lyrics: number;
-    explicit_content_cover: number;
-    preview: string;
-    bpm: number;
-    gain: number;
-    available_countries: string[];
-    contributors: IArtist[];
-    md5_image: string;
-    track_token: string;
-    artist: IArtist;
-    album: IAlbum;
-    type: string;
-    error?: any;
-}
 
 export interface IAlbum {
     id: number;
@@ -62,3 +29,40 @@ export interface IArtist {
     type: string;
     role?: string;
 }
+
+
+export interface ITrackError {
+    type: 'error';
+    error: any;
+}
+
+export interface ITrackData {
+    type: 'data';
+    id: number;
+    readable: boolean;
+    title: string;
+    title_short: string;
+    title_version: string;
+    isrc: string;
+    link: string;
+    share: string;
+    duration: number;
+    track_position: number;
+    disk_number: number;
+    rank: number;
+    release_date: Date;
+    explicit_lyrics: boolean;
+    explicit_content_lyrics: number;
+    explicit_content_cover: number;
+    preview: string;
+    bpm: number;
+    gain: number;
+    available_countries: string[];
+    contributors: IArtist[];
+    md5_image: string;
+    track_token: string;
+    artist: IArtist;
+    album: IAlbum;
+}
+
+export type ITrack = ITrackData | ITrackError;
