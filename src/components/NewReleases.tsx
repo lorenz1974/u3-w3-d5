@@ -35,7 +35,8 @@ const ImagePlaceHolder = ({
         `https://striveschool-api.herokuapp.com/api/deezer/track/${trackId}`
       )
       .then((response) => {
-        setTrack(response.data)
+          setTrack(response.data)
+          if (response.data.error) { console.log(response.data) }
         setIsLoading(false)
       })
       .catch((error) => {
@@ -48,10 +49,7 @@ const ImagePlaceHolder = ({
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>{error}</div>
   if (!track) return <div>No track data available</div>
-  if (
-    track.album.cover_medium !== undefined &&
-    track.artist.picture_medium !== undefined
-  )
+  if (!track.album.cover_medium && !track.artist.picture_medium)
     return <div>No image available</div>
 
   return (
