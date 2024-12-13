@@ -49,9 +49,8 @@ const ImagePlaceHolder = ({
   if (error) return <div>{error}</div>
   if (!track) return <div>No track data available</div>
   if (
-    track.album.cover_small !== undefined &&
     track.album.cover_medium !== undefined &&
-    track.album.cover_big !== undefined
+    track.artist.picture_medium !== undefined
   )
     return <div>No image available</div>
 
@@ -59,11 +58,7 @@ const ImagePlaceHolder = ({
     <Col className={`d-flex flex-column ${className}`}>
       <img
         className='rounded rounded-2 mt-4 bg-songPlaceHolder d-flex justify-content-center align-items-center'
-        src={
-          track.album.cover_medium ||
-          track.album.cover_big ||
-          track.album.cover_small
-        }
+        src={track.album.cover_medium || track.artist.picture_medium}
         alt={track.title || 'No title'}
         style={{ width: '150px', height: '150px' }}
       />
